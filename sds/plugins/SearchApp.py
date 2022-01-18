@@ -421,6 +421,7 @@ class SearchApp(sdsPluginBase):
 
     def search_documents(self,keywords="",start_year=None,end_year=None):
         open_access=[]
+        entry={}
 
         initial_year=0
         final_year = 0
@@ -1088,8 +1089,8 @@ class SearchApp(sdsPluginBase):
             page=self.request.args.get('page') if 'page' in self.request.args else 1
             keywords = self.request.args.get('keywords') if "keywords" in self.request.args else ""
             sort = self.request.args.get('sort') if "sort" in self.request.args else "citations"
-            id = self.request.args.get('institution') if "institution" in self.request.args else ""
-            result=self.search_branch("group",keywords=keywords,institution_id=id,max_results=max_results,page=page,sort=sort)
+            idx = self.request.args.get('institution') if "institution" in self.request.args else ""
+            result=self.search_branch("group",keywords=keywords,institution_id=idx,max_results=max_results,page=page,sort=sort)
         elif data=="authors":
             max_results=self.request.args.get('max') if 'max' in self.request.args else 100
             page=self.request.args.get('page') if 'page' in self.request.args else 1
