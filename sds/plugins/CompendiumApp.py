@@ -31,7 +31,21 @@ class CompendiumApp(sdsPluginBase):
             {"$sort":{"products_count":-1}},
             {"$limit":limit}
         ]
-        products_by_year=list(self.colav_db["branches"].aggregate(pipeline))
+        products_by_year=[]
+        for reg in self.colav_db["branches"].aggregate(pipeline):
+            entry={
+                "id":reg["_id"],
+                "name":reg["name"],
+                "affiliations":{
+                    "institution":{
+                        "name":reg["relations"][0]["name"],
+                        "id":reg["relations"][0]["id"]
+                    }
+                },
+                "products_by_year":reg["products_by_year"] if "products_by_year" in reg.keys() else [],
+                "subjects":[]
+            }
+            products_by_year.append(entry)
 
 
         pipeline=[
@@ -40,7 +54,21 @@ class CompendiumApp(sdsPluginBase):
             {"$sort":{"citations_count":-1}},
             {"$limit":limit}
         ]
-        citations_by_year=list(self.colav_db["branches"].aggregate(pipeline))
+        citations_by_year=[]
+        for reg in self.colav_db["branches"].aggregate(pipeline):
+            entry={
+                "id":reg["_id"],
+                "name":reg["name"],
+                "affiliations":{
+                    "institution":{
+                        "name":reg["relations"][0]["name"],
+                        "id":reg["relations"][0]["id"]
+                    }
+                },
+                "citations_by_year":reg["citations_by_year"] if "citations_by_year" in reg.keys() else [],
+                "subjects":[]
+            }
+            citations_by_year.append(entry)
 
         return {"data":{"products_by_year":products_by_year,"citations_by_year":citations_by_year}}
 
