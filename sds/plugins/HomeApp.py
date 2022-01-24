@@ -16,7 +16,7 @@ class HomeApp(sdsPluginBase):
         self.geojson=json.load(open("sds/etc/bogota.json","r"))
 
     def get_info(self):
-        for idx,loc in enumerate(geojson["features"]):
+        for idx,loc in enumerate(self.geojson["features"]):
             name=loc["properties"]["loc"]
             count=self.colav_db["documents"].count_documents({"$text":{"$search":name}})
             if count!=0:
