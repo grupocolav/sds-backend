@@ -8,10 +8,6 @@ class SearchApp(sdsPluginBase):
 
     def search_author(self,keywords="",affiliation="",country="",max_results=100,page=1,
         group_id=None,institution_id=None,sort="citations"):
-
-
-        
-
         if keywords:
             cursor=self.colav_db['authors'].find({"$text":{"$search":keywords},"external_ids":{"$ne":[]}},{ "score": { "$meta": "textScore" } }).sort([("score", { "$meta": "textScore" } )])
             pipeline=[{"$match":{"$text":{"$search":keywords},"external_ids":{"$ne":[]}}}]
@@ -30,8 +26,6 @@ class SearchApp(sdsPluginBase):
                 {"$group":{"_id":"$id","affiliation":{"$last":"$affiliations"}}},
                 {"$group":{"_id":"$affiliation"}}
             ]
-
-        #affiliations=[reg["_id"] for reg in self.colav_db["authors"].aggregate(aff_pipeline) if "_id" in reg.keys()]
 
         institution_filters = []
         group_filters=[]
@@ -115,12 +109,7 @@ class SearchApp(sdsPluginBase):
                 print("Could not convert end max to int")
                 return None
 
-
-
-
         cursor=cursor.skip(max_results*(page-1)).limit(max_results)
-
-
 
         if cursor:
             author_list=[]
@@ -134,27 +123,11 @@ class SearchApp(sdsPluginBase):
                     "papers_count"   :author["products_count"],
                     "citations_count":author["citations_count"],
                     "affiliations":[{"name":"","id":""}]
-
-
                 }
                 if "affiliations" in author.keys():
                     if len(author["affiliations"])>0:
                         entry["affiliations"][0]["name"]=author["affiliations"][-1]["name"]
                         entry["affiliations"][0]["id"]  =author["affiliations"][-1]["id"]
-                
-                '''if "branches" in author.keys():
-                    for i in range(len(author["branches"])):    
-                        if author["branches"][i]["type"]=="group":
-                            group_name = author["branches"][i]["name"]
-                            group_id =   author["branches"][i]["id"]'''
-
-                
-                
-                #entry["affiliations"][0]["group"]["name"]=group_name
-                #entry["affiliations"][0]["group"]["id"]  =group_id
-                
-                
-
 
                 author_list.append(entry)
     
@@ -773,11 +746,11 @@ class SearchApp(sdsPluginBase):
                     aff_pipeline=[]
 
         #¿ESTO PA' QUÉ?
-        aff_pipeline.extend([
+        '''aff_pipeline.extend([
                 {"$unwind":"$affiliations"},{"$project":{"affiliations":1}},
                 {"$group":{"_id":"$_id","affiliation":{"$last":"$affiliations"}}},
                 {"$group":{"_id":"$affiliation"}}
-            ])
+            ])'''
         #affiliations=[reg["_id"] for reg in self.colav_db["authors"].aggregate(aff_pipeline)]
 
 
@@ -838,11 +811,13 @@ class SearchApp(sdsPluginBase):
                     author_entry={
                         "id":reg_au["_id"],
                         "full_name":reg_au["full_name"],
-                        "affiliations": [{"name":"","id":""}]
+                        "affiliation": {
+                            "institution":{"name":"","id":""}
+                        }
                     }
                     if reg_aff:
-                        author_entry["affiliations"][0]["name"] = reg_aff["name"]
-                        author_entry["affiliations"][0]["id"]   = reg_aff["_id"]
+                        author_entry["affiliation"]["institution"]["name"] = reg_aff["name"]
+                        author_entry["affiliation"]["institution"]["id"]   = reg_aff["_id"]
                     
 
                         
