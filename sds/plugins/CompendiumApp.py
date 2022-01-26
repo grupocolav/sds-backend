@@ -45,7 +45,7 @@ class CompendiumApp(sdsPluginBase):
                     }
                 },
                 "products_by_year":reg["products_by_year"] if "products_by_year" in reg.keys() else [],
-                "subjects":reg["subjects"]
+                "subjects":reg["subjects"][:limit] if len(reg["subjects"])>=limit else reg["subjects"]
             }
             products_by_year.append(entry)
 
@@ -70,7 +70,7 @@ class CompendiumApp(sdsPluginBase):
                     }
                 },
                 "citations_by_year":reg["citations_by_year"] if "citations_by_year" in reg.keys() else [],
-                "subjects":reg["subjects"]
+                "subjects":reg["subjects"][:limit] if len(reg["subjects"])>=5 else reg["subjects"]
             }
             citations_by_year.append(entry)
 
@@ -108,7 +108,7 @@ class CompendiumApp(sdsPluginBase):
                         "id":reg["relations"][0]["id"]
                     }
                 },
-                "subjects":reg["subjects"]
+                "subjects":reg["subjects"][:limit] if len(reg["subjects"])>=limit else reg["subjects"]
             }
             products_subjects.append(entry)
             for prod in reg["products_by_year"]:
@@ -139,7 +139,7 @@ class CompendiumApp(sdsPluginBase):
                         "id":reg["relations"][0]["id"]
                     }
                 },
-                "subjects":reg["subjects"]
+                "subjects":reg["subjects"][:limit] if len(reg["subjects"])>=limit else reg["subjects"]
             }
             citations_subjects.append(entry)
             for cit in reg["citations_by_year"]:

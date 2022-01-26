@@ -122,12 +122,19 @@ class SearchApp(sdsPluginBase):
                     "name":author["full_name"],
                     "papers_count"   :author["products_count"],
                     "citations_count":author["citations_count"],
-                    "affiliations":[{"name":"","id":""}]
+                    "affiliation":{"institution":{"name":"","id":""}}
                 }
                 if "affiliations" in author.keys():
                     if len(author["affiliations"])>0:
-                        entry["affiliations"][0]["name"]=author["affiliations"][-1]["name"]
-                        entry["affiliations"][0]["id"]  =author["affiliations"][-1]["id"]
+                        entry["affiliation"]["institution"]["name"]=author["affiliations"][-1]["name"]
+                        entry["affiliation"]["institution"]["id"]  =author["affiliations"][-1]["id"]
+                if "branches" in author.keys():
+                    for branch in author["branches"]:
+                        if branch["type"]=="group":
+                            entry["affiliation"]["group"]={
+                                "name":branch["name"],
+                                "id":branch["id"]
+                            }
 
                 author_list.append(entry)
     
@@ -222,9 +229,6 @@ class SearchApp(sdsPluginBase):
                 print("Could not convert end max to int")
                 return None
 
-
-
-
         cursor=cursor.skip(max_results*(page-1)).limit(max_results)
 
         pipeline.append({"$group":{"_id":{"country_code":"$addresses.country_code","country":"$addresses.country"}}})
@@ -236,11 +240,6 @@ class SearchApp(sdsPluginBase):
                 if not country in countries:
                     countries.append(country)
 
-        #affiliations=[reg["_id"] for reg in self.colav_db["branches"].aggregate(aff_pipeline)]
-
-
-        
-
         if cursor:
             entity_list=[]
             for entity in cursor:
@@ -249,20 +248,14 @@ class SearchApp(sdsPluginBase):
                     "id":str(entity["_id"]),
                     "papers_count":entity["products_count"],
                     "citations_count":entity["citations_count"],
-                    "affiliations":[{"name":"","id":""}]
+                    "affiliation":{"institution":{"name":"","id":""}}
 
                 }
                 
                 for relation in entity["relations"]:
                     if relation["type"]=="university":
-                        entry["affiliations"][0]["name"]=relation["name"]
-                        entry["affiliations"][0]["id"]=relation["id"]
-                        #entry["affiliations"][0]["group"]["name"]=entity["name"]
-                        #entry["affiliations"][0]["group"]["id"]=entity["_id"]
-
-
-
-
+                        entry["affiliation"]["institution"]["name"]=relation["name"]
+                        entry["affiliation"]["institution"]["id"]=relation["id"]
 
                 entity_list.append(entry)
                         
@@ -272,9 +265,6 @@ class SearchApp(sdsPluginBase):
                     "page":page,
                     "filters":{"institutions":institution_filters},
                     "data":entity_list
-
-
-               
                 }
         else:
             return None
@@ -926,130 +916,6 @@ class SearchApp(sdsPluginBase):
     @endpoint('/app/search', methods=['GET'])
     def app_search(self):
         """
-        @api {get} /app/search Search
-        @apiName app
-        @apiGroup CoLav app
-        @apiDescription Requests search of different entities in the CoLav database
-
-        @apiParam {String} data Specifies the type of entity (or list of entities) to return, namely paper, institution, faculty, department, author
-        @apiParam {String} affiliation The mongo if of the related affiliation of the entity to return
-        @apiParam {String} apikey  Credential for authentication
-
-        @apiError (Error 401) msg  The HTTP 401 Unauthorized invalid authentication apikey for the target resource.
-        @apiError (Error 204) msg  The HTTP 204 No Content.
-        @apiError (Error 200) msg  The HTTP 200 OK.
-
-        @apiSuccessExample {json} Success-Response (data=faculties):
-        [
-            {
-                "name": "Facultad de artes",
-                "id": "602c50d1fd74967db0663830",
-                "abbreviations": [],
-                "external_urls": [
-                {
-                    "source": "website",
-                    "url": "http://www.udea.edu.co/wps/portal/udea/web/inicio/institucional/unidades-academicas/facultades/artes"
-                }
-                ]
-            },
-            {
-                "name": "Facultad de ciencias agrarias",
-                "id": "602c50d1fd74967db0663831",
-                "abbreviations": [],
-                "external_urls": [
-                {
-                    "source": "website",
-                    "url": "http://www.udea.edu.co/wps/portal/udea/web/inicio/unidades-academicas/ciencias-agrarias"
-                }
-                ]
-            },
-            {
-                "name": "Facultad de ciencias económicas",
-                "id": "602c50d1fd74967db0663832",
-                "abbreviations": [
-                "FCE"
-                ],
-                "external_urls": [
-                {
-                    "source": "website",
-                    "url": "http://www.udea.edu.co/wps/portal/udea/web/inicio/institucional/unidades-academicas/facultades/ciencias-economicas"
-                }
-                ]
-            },
-            {
-                "name": "Facultad de ciencias exactas y naturales",
-                "id": "602c50d1fd74967db0663833",
-                "abbreviations": [
-                "FCEN"
-                ],
-                "external_urls": [
-                {
-                    "source": "website",
-                    "url": "http://www.udea.edu.co/wps/portal/udea/web/inicio/unidades-academicas/ciencias-exactas-naturales"
-                }
-                ]
-            }
-        ]
-
-        @apiSuccessExample {json} Success-Response (data=authors):
-            {
-                "data": [
-                    {
-                    "id": "5fc59becb246cc0887190a5c",
-                    "full_name": "Johann Hasler Perez",
-                    "affiliation": {
-                        "id": "60120afa4749273de6161883",
-                        "name": "University of Antioquia"
-                    },
-                    "keywords": [
-                        "elliptical orbits",
-                        "history of ideas",
-                        "history of science",
-                        "johannes kepler",
-                        "music of the spheres",
-                        "planetary music",
-                        "speculative music",
-                        "alchemical meditation",
-                        "atalanta fugiens",
-                        "early multimedia",
-                        "emblem books",
-                        "historical instances of performance",
-                        "michael maier"
-                    ]
-                    },
-                    {
-                    "id": "5fc59d6bb246cc0887190a5d",
-                    "full_name": "Carolina Santamaria Delgado",
-                    "affiliation": {
-                        "id": "60120afa4749273de6161883",
-                        "name": "University of Antioquia"
-                    },
-                    "keywords": [
-                        "art in the university",
-                        "artist-professor",
-                        "intellectual production",
-                        "music as an academic field",
-                        "research-creation",
-                        "the world of art"
-                    ]
-                    }
-                ],
-                "filters": {
-                    "affiliations": [
-                    {
-                        "id": "60120afa4749273de6161883",
-                        "name": "University of Antioquia"
-                    }
-                    ],
-                    "keywords": [],
-                    "countries": [
-                    "CO"
-                    ]
-                },
-                "count": 2,
-                "page": 2,
-                "total_results": 565
-            }
         """
         data = self.request.args.get('data')
         tipo = self.request.args.get('type')
