@@ -252,7 +252,9 @@ class AuthorsApp(sdsPluginBase):
         }
 
         for reg in self.colav_db["documents"].aggregate(pipeline):
-
+            if str(reg["_id"])==str(idx):
+                print("Skipped ",idx)
+                continue
             if "affiliations" in reg["author"].keys():
                 affiliation_id = reg["author"]["affiliations"][-1]["id"]
                 affiliation_name = reg["author"]["affiliations"][-1]["name"]
@@ -263,7 +265,7 @@ class AuthorsApp(sdsPluginBase):
 
             entry["coauthors"].append(
                 {"id":reg["_id"],"name":reg["author"]["full_name"],
-                "affiliations":{"institution":{"id":affiliation_id,
+                "affiliation":{"institution":{"id":affiliation_id,
                     "name":affiliation_name} },
                 "count":reg["count"]} 
             )

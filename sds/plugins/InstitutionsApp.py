@@ -292,7 +292,7 @@ class InstitutionsApp(sdsPluginBase):
         }
  
         entry["institutions"]=[
-            {"name":reg["affiliation"]["name"],"id":reg["_id"],"count":reg["count"]} for reg in self.colav_db["documents"].aggregate(pipeline) 
+            {"name":reg["affiliation"]["name"],"id":reg["_id"],"count":reg["count"]} for reg in self.colav_db["documents"].aggregate(pipeline) if str(reg["_id"])!=idx
         ]
     
         countries=[]
@@ -653,10 +653,11 @@ class InstitutionsApp(sdsPluginBase):
                     aff_entry={}
                     aff_db=self.colav_db["institutions"].find_one({"_id":aff["id"]})
                     if aff_db:
-                        aff_entry={"name":aff_db["name"],"id":aff_db["_id"]}
-                    
-                    affiliations.append(aff_entry)
-                au_entry["affiliations"]=affiliations
+                        aff_entry={"institution":{"name":aff_db["name"],"id":aff_db["_id"]}}
+                        break
+                    else:
+                        aff_entry={"institution":{"name":"","id":""}}
+                au_entry["affiliation"]=aff_entry
                 authors.append(au_entry)
 
 

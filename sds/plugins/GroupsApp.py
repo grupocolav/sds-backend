@@ -310,7 +310,7 @@ class GroupsApp(sdsPluginBase):
 
             entry["coauthors"].append(
                 {"id":reg["_id"],"name":reg["author"]["full_name"],
-                "affiliations":{"institution":{"id":affiliation_id,
+                "affiliation":{"institution":{"id":affiliation_id,
                     "name":affiliation_name} },
                 "count":reg["count"]} 
             )
@@ -522,10 +522,11 @@ class GroupsApp(sdsPluginBase):
                     aff_entry={}
                     aff_db=self.colav_db["institutions"].find_one({"_id":aff["id"]})
                     if aff_db:
-                        aff_entry={"name":aff_db["name"],"id":aff_db["_id"]}
-                    
-                    affiliations.append(aff_entry)
-                au_entry["affiliations"]=affiliations
+                        aff_entry={"institution":{"name":aff_db["name"],"id":aff_db["_id"]}}
+                        break
+                    else:
+                        aff_entry={"institution":{"name":"","id":""}}
+                au_entry["affiliation"]=aff_entry
                 authors.append(au_entry)
 
 
