@@ -6,6 +6,66 @@ class SearchApp(sdsPluginBase):
     def __init__(self, sds):
         super().__init__(sds)
 
+    def search_subjects(self,keywords='',max_results=100,page=1,sort="production",direction="descending"):
+        if keywords:
+            cursor=self.colav_db["subjects"].find({"$text":{"$search":keywords}})
+        else:
+            cursor=self.colav_db["subjects"].find()
+
+        if sort=="citations":
+            cursor.sort([("citations_count",DESCENDING)])
+        if sort=="products":
+                cursor.sort([("products_count",DESCENDING)])
+
+        total=cursor.count()
+        if not page:
+            page=1
+        else:
+            try:
+                page=int(page)
+            except:
+                print("Could not convert end page to int")
+                return None
+        if not max_results:
+            max_results=100
+        else:
+            try:
+                max_results=int(max_results)
+            except:
+                print("Could not convert end max to int")
+                return None
+
+        cursor=cursor.skip(max_results*(page-1)).limit(max_results)
+
+        if cursor:
+            subjects_list=[]
+            for subject in cursor:
+                entry={
+                    "name":subject["name"],
+                    "id":subject["_id"],
+                    "products_count":subject["works_count"],
+                }
+                if "international" in subject.keys():
+                    if "display_name" in subject["international"].keys():
+                        if "es" in subject["international"]["display_name"].keys():
+                            entry["name"]=subject["international"]["display_name"]["es"]
+                subjects_list.append(entry)
+
+            return {
+                    "total_results":total,
+                    "count":len(subjects_list),
+                    "page":page,
+                    "filters":{},
+                    "data":subjects_list
+                }
+
+        else:
+            return None
+        
+
+
+        
+
     def search_author(self,keywords="",affiliation="",country="",max_results=100,page=1,
         group_id=None,institution_id=None,sort="citations"):
         if keywords:
@@ -285,14 +345,11 @@ class SearchApp(sdsPluginBase):
                 cursor=self.colav_db['institutions'].find({"external_ids":{"$ne":[]}})
                 
             country_pipeline=[]
-
         
         if sort=="citations":
             cursor.sort([("citations_count",DESCENDING)])
         if sort=="products":
             cursor.sort([("products_count",DESCENDING)])
-
-            
 
         country_pipeline.append(
             {
@@ -327,12 +384,7 @@ class SearchApp(sdsPluginBase):
                 print("Could not convert end max to int")
                 return None
 
-
-
         cursor=cursor.skip(max_results*(page-1)).limit(max_results)
-
-
-
         if cursor:
             institution_list=[]
             for institution in cursor:
@@ -965,6 +1017,13 @@ class SearchApp(sdsPluginBase):
                     page=page,start_year=start_year,end_year=end_year,sort=sort,
                     direction="descending",tipo=tipo,institution_id=institution_id,
                     group_id=group_id)
+        elif data=="subjects":
+            max_results=self.request.args.get('max') if 'max' in self.request.args else 100
+            page=self.request.args.get('page') if 'page' in self.request.args else 1
+            keywords = self.request.args.get('keywords') if "keywords" in self.request.args else ""
+            sort=self.request.args.get('sort')
+            result=self.search_subjects(keywords=keywords,max_results=max_results,
+                page=page,sort=sort,direction="descending")
 
         else:
             result=None
