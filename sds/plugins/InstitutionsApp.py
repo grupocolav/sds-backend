@@ -657,10 +657,8 @@ class InstitutionsApp(sdsPluginBase):
                         break
                     else:
                         aff_entry={"institution":{"name":"","id":""}}
-                au_entry["affiliation"]=aff_entry
+                    au_entry["affiliation"]=aff_entry
                 authors.append(au_entry)
-
-
 
             try:
                 if doc["publication_type"]["source"]=="lens":
@@ -738,11 +736,6 @@ class InstitutionsApp(sdsPluginBase):
                     {"type":"closed","value":self.colav_db['documents'].count_documents({"open_access_status":"closed","authors.affiliations.id":ObjectId(idx)})},
                     {"type":"hybrid","value":self.colav_db['documents'].count_documents({"open_access_status":"hybrid","authors.affiliations.id":ObjectId(idx)})}
                 ])
-
-
- 
-
-
 
         tipos = self.colav_db['documents'].distinct("publication_type.type",{"authors.affiliations.id":ObjectId(idx)})
 

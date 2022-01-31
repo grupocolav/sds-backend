@@ -38,7 +38,7 @@ class GroupsApp(sdsPluginBase):
                 "type":group["type"],
                 "abbreviations":"",
                 "external_urls":group["external_urls"],
-                "institution":[]
+                "affiliation":{}
             }
             if len(group["abbreviations"])>0:
                 entry["abbreviations"]=group["abbreviations"][0]
@@ -50,7 +50,7 @@ class GroupsApp(sdsPluginBase):
             if inst_id:
                 inst=self.colav_db['institutions'].find_one({"_id":inst_id})
                 if inst:
-                    entry["institution"]=[{"name":inst["name"],"id":inst_id,"logo":inst["logo_url"]}]
+                    entry["affiliation"]={"institution":{"name":inst["name"],"id":inst_id,"logo":inst["logo_url"]}}
 
             return {"data": entry, "filters": filters }
         else:
