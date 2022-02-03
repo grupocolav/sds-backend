@@ -88,11 +88,6 @@ class AuthorsApp(sdsPluginBase):
                         "source":"orcid",
                         "url":"https://orcid.org/"+ext["value"]})
 
-
-                        
-                        
-
-
             return {"data": entry, "filters": filters }
         else:
             return None
@@ -148,9 +143,6 @@ class AuthorsApp(sdsPluginBase):
         elif start_year and end_year:
             pipeline.extend([{"$match":{"citers.year_published":{"$gte":start_year,"$lte":end_year}}}])
 
-            
-
-
         geo_pipeline = pipeline[:] # a clone
 
 
@@ -162,13 +154,6 @@ class AuthorsApp(sdsPluginBase):
                 "_id":1
             }}
         ])
-
-
-
- 
-
-
-    
 
         geo_pipeline.extend([
             {"$unwind":"$citers.authors"},
@@ -197,6 +182,62 @@ class AuthorsApp(sdsPluginBase):
                                  )
     
         return {"data": entry}
+
+    def get_subjects(self,idx=None,start_year=None,end_year=None,limit=10):
+        initial_year=0
+        final_year=0
+
+        if not limit:
+            limit=10
+        else:
+            try:
+                limit=int(limit)
+            except:
+                print("Could not convert limit to int")
+                return None
+
+        if start_year:
+            try:
+                start_year=int(start_year)
+            except:
+                print("Could not convert start year to int")
+                return None
+        if end_year:
+            try:
+                end_year=int(end_year)
+            except:
+                print("Could not convert end year to int")
+                return None
+        if idx:
+            result=self.colav_db["authors"].find_one({"_id":ObjectId(idx)})
+        else:
+            return None
+
+        if not "subjects_by_year" in result.keys():
+            return None
+        if not result["subjects_by_year"]:
+            return None
+
+        data=[]
+        names=[]
+        for key,val in result["subjects_by_year"].items():
+            year=int(key)
+            if start_year:
+                if start_year>year:
+                    continue
+            if end_year:
+                if end_year<year:
+                    continue
+            for sub in val:
+                if sub["name"] in names:
+                    data[names.index(sub["name"])]["value"]+=sub["value"]
+                else:
+                    data.append(sub)
+                    names.append(sub["name"])
+        
+        sorted_data=sorted(data,key=lambda x:x["value"],reverse=True)
+                
+        return {"data":sorted_data[:limit],"total":len(data)}
 
     def get_coauthors(self,idx=None,start_year=None,end_year=None):
         initial_year=0
@@ -1007,7 +1048,24 @@ class AuthorsApp(sdsPluginBase):
                 status=204,
                 mimetype='application/json'
                 )
-
+        elif data=="subjects":
+            idx = self.request.args.get('id')
+            start_year=self.request.args.get('start_year')
+            end_year=self.request.args.get('end_year')
+            limit=self.request.args.get('limit')
+            subjects=self.get_subjects(idx,start_year,end_year,limit)
+            if subjects:
+                response = self.app.response_class(
+                response=self.json.dumps(subjects),
+                status=200,
+                mimetype='application/json'
+                )
+            else:
+                response = self.app.response_class(
+                response=self.json.dumps({"status":"Request returned empty"}),
+                status=204,
+                mimetype='application/json'
+                )
         elif data=="csv":
             idx = self.request.args.get('id')
             start_year=self.request.args.get('start_year')
