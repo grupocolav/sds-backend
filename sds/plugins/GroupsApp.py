@@ -124,13 +124,6 @@ class GroupsApp(sdsPluginBase):
             }}
         ])
 
-
-
- 
-
-
-    
-
         geo_pipeline.extend([
             {"$unwind":"$citers.authors"},
             {"$project":{"citers.authors.affiliations":1}},
@@ -142,13 +135,9 @@ class GroupsApp(sdsPluginBase):
             {"$unwind": "$_id"}, {"$unwind": "$country"}
         ])
 
-
         for idx,reg in enumerate(self.colav_db["documents"].aggregate(pipeline)):
             entry["citations"]+=reg["count"]
             entry["yearly_citations"].append({"year":reg["_id"],"value":reg["count"]})
-
-
-
 
         for i, reg in enumerate(self.colav_db["documents"].aggregate(geo_pipeline)):
             entry["geo"].append({"country": reg["country"],
@@ -175,14 +164,9 @@ class GroupsApp(sdsPluginBase):
                 {"$project":{"_id":1,"author.full_name":1,"author.affiliations.name":1,"author.affiliations.id":1,
                     "author.affiliations.branches.name":1,"author.affiliations.branches.type":1,"author.affiliations.branches.id":1,
                     "papers_count":1,"citations_count":1}}
-
-
-
             ])
 
-
             total_results = self.colav_db["authors"].count_documents({"branches.id":ObjectId(idx)})
-
 
             if not page:
                 page=1
@@ -206,8 +190,6 @@ class GroupsApp(sdsPluginBase):
 
             pipeline.extend([{"$skip":skip},{"$limit":max_results}])
 
-
-            #result= self.colav_db["documents"].aggregate(pipeline)
             cursor=self.colav_db["authors"].find({"branches.id":ObjectId(idx)},
                                                 {"full_name":1,"affiliations":1,"branches":1,"citations_count":1,"products_count":1})
             cursor=cursor.skip(skip).limit(max_results)
@@ -217,9 +199,7 @@ class GroupsApp(sdsPluginBase):
             if sort=="citations" and direction=="descending":
                 cursor.sort([("citations_count",DESCENDING)])
 
-        
             entry = []
-
             for reg in cursor:
                 if "branches" in reg.keys():
                     for i in range(len(reg["branches"])):    
@@ -229,8 +209,6 @@ class GroupsApp(sdsPluginBase):
                 else:
                     group_name=""
                     group_id=""
-                        
-
         
                 entry.append({
                     "id":reg["_id"],
@@ -244,7 +222,56 @@ class GroupsApp(sdsPluginBase):
             
         return {"total":total_results,"page":page,"count":len(entry),"data":entry}
 
+    def get_subjects(self,idx=None,start_year=None,end_year=None,limit=10):
+        initial_year=0
+        final_year=0
 
+        if not limit:
+            limit=10
+
+        if start_year:
+            try:
+                start_year=int(start_year)
+            except:
+                print("Could not convert start year to int")
+                return None
+        if end_year:
+            try:
+                end_year=int(end_year)
+            except:
+                print("Could not convert end year to int")
+                return None
+        if idx:
+            result=self.colav_db["branches"].find_one({"_id":ObjectId(idx)})
+        else:
+            return None
+
+        if not "subjects_by_year" in result.keys():
+            return None
+        if not result["subjects_by_year"]:
+            return None
+
+        data=[]
+        names=[]
+        for key,val in result["subjects_by_year"].items():
+            year=int(key)
+            if start_year:
+                if start_year>year:
+                    continue
+            if end_year:
+                if end_year<year:
+                    continue
+            for sub in val:
+                if sub["name"] in names:
+                    data[names.index(sub["name"])]["value"]+=sub["value"]
+                else:
+                    data.append(sub)
+                    names.append(sub["name"])
+        
+        sorted_data=sorted(data,key=lambda x:x["value"],reverse=True)
+                
+        return {"data":sorted_data[:limit],"total":len(data)}
+                
 
     def get_coauthors(self,idx=None,start_year=None,end_year=None):
         initial_year=0
@@ -280,7 +307,6 @@ class GroupsApp(sdsPluginBase):
                     {"$match":{"year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.branches.id":ObjectId(idx)}}
                 ]
                 
-
         #Meter esto en info
         pipeline.extend([
             {"$unwind":"$authors"},
@@ -295,8 +321,6 @@ class GroupsApp(sdsPluginBase):
             "coauthors":[],
             "geo":[]
         }
-
-
 
         for reg in self.colav_db["documents"].aggregate(pipeline):
 
@@ -350,11 +374,7 @@ class GroupsApp(sdsPluginBase):
             item["log_count"]=log(item["count"])
         entry["geo"]=countries
                         
-
-
         return {"data":entry}
-
-
 
     def get_venn(self,venn_query):
         venn_source={
@@ -475,8 +495,6 @@ class GroupsApp(sdsPluginBase):
             else:
                 cursor=self.colav_db['documents'].find({"authors.affiliations.branches.id":ObjectId(idx),"publication_type.type":tipo})
 
-
-        
         total=cursor.count()
         if not page:
             page=1
@@ -495,7 +513,6 @@ class GroupsApp(sdsPluginBase):
                 print("Could not convert end max to int")
                 return None
         
-
         if sort=="citations" and direction=="ascending":
             cursor.sort([("citations_count",ASCENDING)])
         if sort=="citations" and direction=="descending":
@@ -529,8 +546,6 @@ class GroupsApp(sdsPluginBase):
                 au_entry["affiliation"]=aff_entry
                 authors.append(au_entry)
 
-
-
             try:
                 if doc["publication_type"]["source"]=="lens":
 
@@ -554,8 +569,6 @@ class GroupsApp(sdsPluginBase):
     def get_production(self,idx=None,start_year=None,end_year=None,sort=None,direction=None):
 
         open_access=[]
-
-       
         
         if start_year:
             try:
@@ -607,9 +620,6 @@ class GroupsApp(sdsPluginBase):
                     {"type":"closed","value":self.colav_db['documents'].count_documents({"open_access_status":"closed","authors.affiliations.branches.id":ObjectId(idx)})},
                     {"type":"hybrid","value":self.colav_db['documents'].count_documents({"open_access_status":"hybrid","authors.affiliations.branches.id":ObjectId(idx)})}
                 ])
-
-
-
 
         tipos = self.colav_db['documents'].distinct("publication_type.type",{"authors.affiliations.branches.id":ObjectId(idx)})
 
@@ -802,8 +812,6 @@ class GroupsApp(sdsPluginBase):
             papers.append(entry)
         return str(papers)
 
-
-
     @endpoint('/app/groups', methods=['GET'])
     def app_groups(self):
         """
@@ -871,14 +879,12 @@ class GroupsApp(sdsPluginBase):
                 status=204,
                 mimetype='application/json'
                 )
-
         elif data=="authors":
             idx = self.request.args.get('id')
             max_results=self.request.args.get('max')
             page=self.request.args.get('page')
 
             authors = self.get_authors(idx)
-
 
             if authors:
                 response = self.app.response_class(
@@ -892,8 +898,6 @@ class GroupsApp(sdsPluginBase):
                 status=204,
                 mimetype='application/json'
                 )
-
-        
         elif data=="coauthors":
             idx = self.request.args.get('id')
             start_year=self.request.args.get('start_year')
@@ -911,7 +915,24 @@ class GroupsApp(sdsPluginBase):
                 status=204,
                 mimetype='application/json'
                 )
-
+        elif data=="subjects":
+            idx = self.request.args.get('id')
+            start_year=self.request.args.get('start_year')
+            end_year=self.request.args.get('end_year')
+            limit=self.request.args.get('limit')
+            subjects=self.get_subjects(idx,start_year,end_year,limit)
+            if subjects:
+                response = self.app.response_class(
+                response=self.json.dumps(subjects),
+                status=200,
+                mimetype='application/json'
+                )
+            else:
+                response = self.app.response_class(
+                response=self.json.dumps({"status":"Request returned empty"}),
+                status=204,
+                mimetype='application/json'
+                )
         elif data=="csv":
             idx = self.request.args.get('id')
             start_year=self.request.args.get('start_year')

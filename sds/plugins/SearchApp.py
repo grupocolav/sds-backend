@@ -6,7 +6,7 @@ class SearchApp(sdsPluginBase):
     def __init__(self, sds):
         super().__init__(sds)
 
-    def search_subjects(self,keywords='',max_results=100,page=1,sort="production",direction="descending"):
+    def search_subjects(self,keywords='',max_results=100,page=1,sort="products",direction="descending"):
         if keywords:
             cursor=self.colav_db["subjects"].find({"$text":{"$search":keywords}})
         else:
@@ -14,8 +14,8 @@ class SearchApp(sdsPluginBase):
 
         if sort=="citations":
             cursor.sort([("citations_count",DESCENDING)])
-        if sort=="products":
-                cursor.sort([("products_count",DESCENDING)])
+        else:
+            cursor.sort([("products_count",DESCENDING)])
 
         total=cursor.count()
         if not page:
@@ -61,10 +61,6 @@ class SearchApp(sdsPluginBase):
 
         else:
             return None
-        
-
-
-        
 
     def search_author(self,keywords="",affiliation="",country="",max_results=100,page=1,
         group_id=None,institution_id=None,sort="citations"):
