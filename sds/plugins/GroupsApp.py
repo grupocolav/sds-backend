@@ -228,6 +228,12 @@ class GroupsApp(sdsPluginBase):
 
         if not limit:
             limit=10
+        else:
+            try:
+                limit=int(limit)
+            except:
+                print("Could not convert limit to int")
+                return None
 
         if start_year:
             try:
