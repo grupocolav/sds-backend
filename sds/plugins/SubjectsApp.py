@@ -39,9 +39,11 @@ class SubjectsApp(sdsPluginBase):
             return None
         tree={
             "title":result["name"],
-            "key":result["level"],
+            "level":result["level"],
+            "key":"0",
             "children":[]
         }
+        count=0
         if result["related_concepts"]:
             for sub in result["related_concepts"]:
                 if sub["level"]-1!=result["level"]:
@@ -49,9 +51,11 @@ class SubjectsApp(sdsPluginBase):
                 entry={
                     "title":sub["display_name"],
                     "id":sub["id"] if "id" in sub.keys() else "",
-                    "key":sub["level"]
+                    "level":sub["level"],
+                    "key":"0-"+str(count)
                 }
                 tree["children"].append(entry)
+                count+=1
         parent={}
         if result["ancestors"]:
             for ancestor in result["ancestors"]:
@@ -61,7 +65,7 @@ class SubjectsApp(sdsPluginBase):
                     parent={
                         "title":ancestor["display_name"],
                         "id":ancestor["id"] if "id" in ancestor.keys() else "",
-                        "key":ancestor["level"]
+                        "level":ancestor["level"]
                     }
                     break
 
