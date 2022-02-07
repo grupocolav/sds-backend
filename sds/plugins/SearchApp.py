@@ -66,6 +66,7 @@ class SearchApp(sdsPluginBase):
         group_id=None,institution_id=None,sort="citations"):
         if keywords:
             cursor=self.colav_db['authors'].find({"$text":{"$search":keywords},"external_ids":{"$ne":[]}},{ "score": { "$meta": "textScore" } }).sort([("score", { "$meta": "textScore" } )])
+            filter_cursor=self.colav_db['authors'].find({"$text":{"$search":keywords},"external_ids":{"$ne":[]}},{ "score": { "$meta": "textScore" } }).sort([("score", { "$meta": "textScore" } )])
             pipeline=[{"$match":{"$text":{"$search":keywords},"external_ids":{"$ne":[]}}}]
             aff_pipeline=[
                 {"$match":{"$text":{"$search":keywords},"external_ids":{"$ne":[]}}},
@@ -75,6 +76,7 @@ class SearchApp(sdsPluginBase):
             ]
         else:
             cursor=self.colav_db['authors'].find({"external_ids":{"$ne":[]}})
+            filter_cursor=self.colav_db['authors'].find({"external_ids":{"$ne":[]}})
             pipeline=[{"$match":{"external_ids":{"$ne":[]}}}]
             aff_pipeline=[
                 {"$match":{"external_ids":{"$ne":[]}}},
@@ -85,19 +87,25 @@ class SearchApp(sdsPluginBase):
 
         institution_filters = []
         group_filters=[]
+        institution_ids=[]
+        groups_ids=[]
 
-        institutions_ids = cursor.distinct("affiliations.id")
-        branches  = cursor.distinct("branches")
-
-        for id in institutions_ids:
-            entry = {"id":str(id),"name":list(self.colav_db['institutions'].find({"_id":id},{"name":1}))[0]["name"]}
-            institution_filters.append(entry)
-
-        for branch in branches:
-            if branch["type"]=='group':
-                entry = {"id":str(branch["id"]),"name":branch["name"]}
-                group_filters.append(entry)
-
+        for author in filter_cursor:
+            if "affiliations" in author.keys():
+                if len(author["affiliations"])>0:
+                    institution=author["affiliations"][0]
+                    if not str(institution["id"]) in institution_ids:    
+                        institution_ids.append(str(institution["id"]))
+                        entry = {"id":str(institution["id"]),"name":institution["name"]}
+                        institution_filters.append(entry)
+            if "branches" in author.keys():
+                if len(author["branches"])>0:
+                    for branch in author["branches"]:
+                        if branch["type"]=="group":
+                            if not str(branch["id"]) in groups_ids:
+                                groups_ids.append(str(branch["id"]))
+                                entry = {"id":str(branch["id"]),"name":branch["name"]}
+                                group_filters.append(entry)
 
         if keywords and group_id:
             cursor=self.colav_db['authors'].find({"$text":{"$search":keywords},"external_ids":{"$ne":[]},
@@ -144,7 +152,7 @@ class SearchApp(sdsPluginBase):
         if sort=="citations":
             cursor.sort([("citations_count",DESCENDING)])
         if sort=="products":
-                cursor.sort([("products_count",DESCENDING)])
+            cursor.sort([("products_count",DESCENDING)])
 
 
         total=cursor.count()
