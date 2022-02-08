@@ -15,6 +15,90 @@ class HomeApp(sdsPluginBase):
         super().__init__(sds)
         self.geojson=json.load(open("sds/etc/bogota.json","r"))
 
+    def get_subjects_tree(self):
+        medicine=self.colav_db["subjects"].find_one({"name":"Medicine"},{"works_count":1})
+        psychology=self.colav_db["subjects"].find_one({"name":"Psychology"},{"works_count":1})
+        data={
+            "id":"A0",
+            "value":{
+                "items":[{
+                    "text":"Temas de Salud"
+                }]
+            },
+            "children":[
+                {
+                    "id":str(medicine["_id"]),
+                    "value":{
+                        "items":[
+                            {
+                                "text":"Medicine"
+                            },
+                            {
+                                "text":"Productos",
+                                "value":medicine["works_count"]
+                            }
+                        ]
+                    },
+                    "children":[]
+                },
+                {
+                    "id":str(psychology["_id"]),
+                    "value":{
+                        "items":[
+                            {
+                                "text":"Psychology"
+                            },
+                            {
+                                "text":"Productos",
+                                "value":psychology["works_count"]
+                            }
+                        ]
+                    },
+                    "children":[]
+                }
+            ]
+        }
+        children=[]
+        for subject in self.colav_db["subjects"].find({"ancestor.display_name":"Medicine","level":1}):
+            entry={
+                "id":subject["_id"],
+                "value":{
+                    "items":[
+                        {
+                            "text":subject["name"]
+                        },
+                        {
+                            "text":"Productos",
+                            "value":subject["works_count"]
+                        }
+                    ]
+                }
+            }
+            children.append(entry)
+        data["children"][0]["children"]=children
+
+        children=[]
+        for subject in self.colav_db["subjects"].find({"ancestor.display_name":"Psychology","level":1}):
+            entry={
+                "id":subject["_id"],
+                "value":{
+                    "items":[
+                        {
+                            "text":subject["name"]
+                        },
+                        {
+                            "text":"Productos",
+                            "value":subject["works_count"]
+                        }
+                    ]
+                }
+            }
+            children.append(entry)
+        data["children"][1]["children"]=children
+
+        return data
+        
+
     def get_info(self):
         for idx,loc in enumerate(self.geojson["features"]):
             name=loc["properties"]["loc"]
@@ -38,7 +122,8 @@ class HomeApp(sdsPluginBase):
                     "id":""
                 }
 
-        return {"data":self.geojson}
+        return {"data":self.geojson,"subject_tree":self.get_subjects_tree()}
+
             
 
     @endpoint('/app/home', methods=['GET'])
@@ -52,7 +137,7 @@ class HomeApp(sdsPluginBase):
             response=self.json.dumps(info),
             status=200,
             mimetype='application/json'
-            )
+            ) 
         else:
             response = self.app.response_class(
                 response=self.json.dumps({}),
