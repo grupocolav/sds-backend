@@ -59,7 +59,11 @@ class HomeApp(sdsPluginBase):
             ]
         }
         children=[]
+        ids=[]
         for subject in self.colav_db["subjects"].find({"ancestors.display_name":"Medicine","level":1}):
+            if str(subject["_id"]) in ids:
+                continue
+            ids.append(str(subject["_id"]))
             entry={
                 "id":str(subject["_id"]),
                 "value":{
@@ -78,7 +82,11 @@ class HomeApp(sdsPluginBase):
         data["children"][0]["children"]=children
 
         children=[]
+        ids=[]
         for subject in self.colav_db["subjects"].find({"ancestors.display_name":"Psychology","level":1}):
+            if str(subject["_id"]) in ids:
+                continue
+            ids.append(str(subject["_id"]))
             entry={
                 "id":str(subject["_id"]),
                 "value":{

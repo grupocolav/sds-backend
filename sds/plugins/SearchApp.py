@@ -213,8 +213,6 @@ class SearchApp(sdsPluginBase):
             return None
 
     def search_branch(self,branch,keywords="",institution_id=None,max_results=100,page=1,sort="citations"):
-
-
         if keywords:
             cursor=self.colav_db['branches'].find({"$text":{"$search":keywords},"type":branch})        
             relations = cursor.distinct("relations")
