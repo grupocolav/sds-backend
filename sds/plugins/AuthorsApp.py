@@ -273,8 +273,6 @@ class AuthorsApp(sdsPluginBase):
                 pipeline=[
                     {"$match":{"year_published":{"$gte":start_year,"$lte":end_year},"authors.id":ObjectId(idx)}}
                 ]
-                
-
 
         pipeline.extend([
             {"$unwind":"$authors"},
@@ -310,7 +308,6 @@ class AuthorsApp(sdsPluginBase):
                     "name":affiliation_name} },
                 "count":reg["count"]} 
             )
-
 
         countries=[]
         country_list=[]
@@ -453,7 +450,6 @@ class AuthorsApp(sdsPluginBase):
                 "label":au["full_name"] if  au  else "",
                 "affiliation":aff["name"] if aff!="" else "",
             }],"edges":[]}
-
 
         return {"data":entry}
 
@@ -727,8 +723,6 @@ class AuthorsApp(sdsPluginBase):
 
             else:
                 cursor=self.colav_db['documents'].find({"authors.id":ObjectId(idx),"publication_type.type":tipo})
-
-
         
         total=cursor.count()
         if not page:
@@ -748,7 +742,6 @@ class AuthorsApp(sdsPluginBase):
                 print("Could not convert end max to int")
                 return None
         
-
         if sort=="citations" and direction=="ascending":
             cursor.sort([("citations_count",ASCENDING)])
         if sort=="citations" and direction=="descending":
@@ -763,7 +756,6 @@ class AuthorsApp(sdsPluginBase):
         entry=[]
 
         for doc in cursor:
-            
             authors=[]
             for author in doc["authors"]:
                 au_entry={}
@@ -780,8 +772,6 @@ class AuthorsApp(sdsPluginBase):
                     affiliations.append(aff_entry)
                 au_entry["affiliations"]=affiliations
                 authors.append(au_entry)
-
-
 
             try:
                 if doc["publication_type"]["source"]=="lens":

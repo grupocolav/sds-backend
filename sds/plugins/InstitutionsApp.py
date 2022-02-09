@@ -140,7 +140,6 @@ class InstitutionsApp(sdsPluginBase):
     
     def get_authors(self,idx=None,page=1,max_results=100):
         if idx:
-
             pipeline=[
                 {"$match":{"authors.affiliations.id":ObjectId(idx)}}
             ]
@@ -155,11 +154,9 @@ class InstitutionsApp(sdsPluginBase):
                 {"$project":{"author.id":1,"author.full_name":1,"author.affiliations.name":1,"author.affiliations.id":1,
                     "author.affiliations.branches.name":1,"author.affiliations.branches.type":1,"author.affiliations.branches.id":1,
                     "papers_count":1,"citations_count":1}}
-
             ])
 
             total_results = self.colav_db["authors"].count_documents({"affiliations.id":ObjectId(idx)})
-
 
             if not page:
                 page=1
@@ -178,11 +175,9 @@ class InstitutionsApp(sdsPluginBase):
                     print("Could not convert end max to int")
                     return None
 
-            
             skip = (max_results*(page-1))
 
             pipeline.extend([{"$skip":skip},{"$limit":max_results}])
-
 
             result= self.colav_db["documents"].aggregate(pipeline)
         
@@ -197,7 +192,6 @@ class InstitutionsApp(sdsPluginBase):
                             group_name = reg["author"]["affiliations"][0]["branches"][i]["name"]
                             group_id =   reg["author"]["affiliations"][0]["branches"][i]["id"]    
 
-        
                 entry.append({
                     "id":reg["_id"],
                     "name":reg["author"]["full_name"],
