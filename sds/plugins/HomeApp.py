@@ -18,45 +18,37 @@ class HomeApp(sdsPluginBase):
     def get_subjects_tree(self):
         medicine=self.colav_db["subjects"].find_one({"name":"Medicine"},{"works_count":1})
         psychology=self.colav_db["subjects"].find_one({"name":"Psychology"},{"works_count":1})
-        data={
-            "id":"A0",
+
+        data={"Medicine":{
+            "id":str(medicine["_id"]),
             "value":{
-                "items":[{
-                    "text":"Temas de Salud"
-                }]
+                "items":[
+                    {
+                        "text":"Medicine"
+                    },
+                    {
+                        "text":"Productos",
+                        "value":medicine["works_count"]
+                    }
+                ]
             },
-            "children":[
-                {
-                    "id":str(medicine["_id"]),
-                    "value":{
-                        "items":[
-                            {
-                                "text":"Medicine"
-                            },
-                            {
-                                "text":"Productos",
-                                "value":medicine["works_count"]
-                            }
-                        ]
+            "children":[]
+        },
+        "Psychology":{
+            "id":str(psychology["_id"]),
+            "value":{
+                "items":[
+                    {
+                        "text":"Psychology"
                     },
-                    "children":[]
-                },
-                {
-                    "id":str(psychology["_id"]),
-                    "value":{
-                        "items":[
-                            {
-                                "text":"Psychology"
-                            },
-                            {
-                                "text":"Productos",
-                                "value":psychology["works_count"]
-                            }
-                        ]
-                    },
-                    "children":[]
-                }
-            ]
+                    {
+                        "text":"Productos",
+                        "value":psychology["works_count"]
+                    }
+                ]
+            },
+            "children":[]
+        }
         }
         children=[]
         ids=[]
@@ -79,7 +71,7 @@ class HomeApp(sdsPluginBase):
                 }
             }
             children.append(entry)
-        data["children"][0]["children"]=children
+        data["Medicine"]["children"]=children
 
         children=[]
         ids=[]
@@ -102,7 +94,7 @@ class HomeApp(sdsPluginBase):
                 }
             }
             children.append(entry)
-        data["children"][1]["children"]=children
+        data["Psychology"]["children"]=children
 
         return data
         
