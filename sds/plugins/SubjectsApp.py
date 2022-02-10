@@ -401,7 +401,51 @@ class SubjectsApp(sdsPluginBase):
         return None
     
     def get_groups(self,idx=None,page=1,max_results=100,sort="citations",direction="descending"):
-        return None
+        pipeline=[
+            {"$match":{"type":"group","subjects.id":ObjectId(idx)}},
+            {"$project":{"_id":1,"name":1}},
+            {"$lookup":{"from":"documents","localField":"_id","foreignField":"authors.affiliations.branches.id","as":"papers"}},
+            {"$project":{"papers.citations_count":1,"name":1}},
+            {"$unwind":"$papers"},
+            {"$group":{"_id":"$_id","citations":{"$sum":"$papers.citations_count"},"name":{"$first":"$name"}}},
+            {"$sort":{"citations":-1}}
+        ]
+        
+        total_results = self.colav_db["branches"].count_documents({"type":"group","subjects.id":ObjectId(idx)})
+
+        if not page:
+            page=1
+        else:
+            try:
+                page=int(page)
+            except:
+                print("Could not convert end page to int")
+                return None
+        if not max_results:
+            max_results=100
+        else:
+            try:
+                max_results=int(max_results)
+            except:
+                print("Could not convert end max to int")
+                return None
+
+        skip = (max_results*(page-1))
+
+        cursor=self.colav_db["branches"].find({"type":"group","subjects.id":ObjectId(idx)})
+
+        cursor=cursor.skip(skip).limit(max_results)
+
+        if sort=="citations" and direction=="ascending":
+            cursor.sort([("citations_count",ASCENDING)])
+        if sort=="citations" and direction=="descending":
+            cursor.sort([("citations_count",DESCENDING)])
+
+        entry = []
+        for reg in cursor:
+            entry.append({"name":reg["name"],"id":reg["_id"],"citations":reg["citations_count"]})
+
+        return {"total":total_results,"page":page,"count":len(entry),"data":entry}
 
     def get_authors(self,idx=None,page=1,max_results=100):
         if idx:

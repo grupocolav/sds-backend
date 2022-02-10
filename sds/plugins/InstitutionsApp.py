@@ -492,10 +492,8 @@ class InstitutionsApp(sdsPluginBase):
             {"$group":{"_id":"$_id","citations":{"$sum":"$papers.citations_count"},"name":{"$first":"$name"}}},
             {"$sort":{"citations":-1}}
         ]
-
         
         total_results = self.colav_db["branches"].count_documents({"type":"group","relations.id":ObjectId(idx)})
-
 
         if not page:
             page=1
@@ -514,10 +512,8 @@ class InstitutionsApp(sdsPluginBase):
                 print("Could not convert end max to int")
                 return None
 
-        
         skip = (max_results*(page-1))
 
-        #pipeline.extend([{"$skip":skip},{"$limit":max_results}])
         cursor=self.colav_db["branches"].find({"type":"group","relations.id":ObjectId(idx)})
 
         cursor=cursor.skip(skip).limit(max_results)
@@ -527,14 +523,9 @@ class InstitutionsApp(sdsPluginBase):
         if sort=="citations" and direction=="descending":
             cursor.sort([("citations_count",DESCENDING)])
 
-
-
         entry = []
-
         for reg in cursor:
             entry.append({"name":reg["name"],"id":reg["_id"],"citations":reg["citations_count"]})
-
-
 
         return {"total":total_results,"page":page,"count":len(entry),"data":entry}
 
