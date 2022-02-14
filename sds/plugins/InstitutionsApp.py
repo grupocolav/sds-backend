@@ -12,6 +12,8 @@ class InstitutionsApp(sdsPluginBase):
         super().__init__(sds)
 
     def get_info(self,idx):
+        initial_year=0
+        final_year = 0
         institution = self.colav_db['institutions'].find_one({"_id":ObjectId(idx)})
         if institution:
             entry={"id":institution["_id"],
@@ -725,8 +727,6 @@ class InstitutionsApp(sdsPluginBase):
         
         open_access=[]
 
-       
-        
         if start_year:
             try:
                 start_year=int(start_year)
