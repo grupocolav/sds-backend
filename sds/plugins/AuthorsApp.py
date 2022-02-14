@@ -29,8 +29,8 @@ class AuthorsApp(sdsPluginBase):
                     final_year=result[0]["year_published"]
 
         filters={
-            "start_year":initial_year,
-            "end_year":final_year
+            "start_year":initial_year if initial_year!=0 else "",
+            "end_year":final_year if final_year!=0 else ""
         }
 
 

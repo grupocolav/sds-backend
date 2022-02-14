@@ -428,8 +428,8 @@ class SearchApp(sdsPluginBase):
                 
 
             filters={
-                "start_year":initial_year,
-                "end_year":final_year
+                "start_year":initial_year if initial_year!=0 else "",
+                "end_year":final_year if final_year!=0 else ""
             }
 
             return {"filters": filters}
@@ -473,9 +473,9 @@ class SearchApp(sdsPluginBase):
                     final_year=result[0]["year_published"]
 
         years={
-                "start_year":initial_year,
-                "end_year":final_year
-                }
+                "start_year":initial_year if initial_year!=0 else "",
+                "end_year":final_year if final_year!=0 else ""
+            }
 
         institution_filters = []
         group_filters=[]
