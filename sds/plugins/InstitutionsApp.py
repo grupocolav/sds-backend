@@ -746,40 +746,76 @@ class InstitutionsApp(sdsPluginBase):
 
             if start_year and not end_year:
                 venn_query={"year_published":{"$gte":start_year},"authors.affiliations.id":ObjectId(idx)}
-                open_access.extend([
-                    {"type":"green" ,"value":self.colav_db['documents'].count_documents({"open_access_status":"green","year_published":{ "$gte":start_year},"authors.affiliations.id":ObjectId(idx)})  },
-                    {"type":"gold"  ,"value":self.colav_db['documents'].count_documents({"open_access_status":"gold","year_published":  {"$gte":start_year},"authors.affiliations.id":ObjectId(idx)})   },
-                    {"type":"bronze","value":self.colav_db['documents'].count_documents({"open_access_status":"bronze","year_published":{"$gte":start_year},"authors.affiliations.id":ObjectId(idx)}) },
-                    {"type":"closed","value":self.colav_db['documents'].count_documents({"open_access_status":"closed","year_published":{"$gte":start_year},"authors.affiliations.id":ObjectId(idx)}) },
-                    {"type":"hybrid","value":self.colav_db['documents'].count_documents({"open_access_status":"hybrid","year_published":{"$gte":start_year},"authors.affiliations.id":ObjectId(idx)}) }
-                ])
+                val=self.colav_db['documents'].count_documents({"open_access_status":"green","year_published":{ "$gte":start_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"green" ,"value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"gold","year_published":  {"$gte":start_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"gold"  ,"value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"bronze","year_published":{"$gte":start_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"bronze","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"closed","year_published":{"$gte":start_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"closed","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"hybrid","year_published":{"$gte":start_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"hybrid","value":val})
+                
             elif end_year and not start_year:
                 venn_query={"year_published":{"$lte":end_year},"authors.affiliations.id":ObjectId(idx)}
-                open_access.extend([
-                    {"type":"green" ,"value":self.colav_db['documents'].count_documents({"open_access_status":"green","year_published": {"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})  },
-                    {"type":"gold"  ,"value": self.colav_db['documents'].count_documents({"open_access_status":"gold","year_published": {"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})  },
-                    {"type":"bronze","value":self.colav_db['documents'].count_documents({"open_access_status":"bronze","year_published":{"$lte":end_year},"authors.affiliations.id":ObjectId(idx)}) },
-                    {"type":"closed","value":self.colav_db['documents'].count_documents({"open_access_status":"closed","year_published":{"$lte":end_year},"authors.affiliations.id":ObjectId(idx)}) },
-                    {"type":"hybrid","value":self.colav_db['documents'].count_documents({"open_access_status":"hybrid","year_published":{"$lte":end_year},"authors.affiliations.id":ObjectId(idx)}) }
-                ])
+                val=self.colav_db['documents'].count_documents({"open_access_status":"green","year_published": {"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"green" ,"value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"gold","year_published": {"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"gold"  ,"value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"bronze","year_published":{"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"bronze","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"closed","year_published":{"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"closed","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"hybrid","year_published":{"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"hybrid","value":val})
+                
             elif start_year and end_year:
                 venn_query={"year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)}
-                open_access.extend([
-                    {"type":"green" ,"value":self.colav_db['documents'].count_documents({"open_access_status":"green","year_published": {"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)}) },
-                    {"type":"gold"  ,"value":self.colav_db['documents'].count_documents({"open_access_status":"gold","year_published":  {"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})  },
-                    {"type":"bronze","value":self.colav_db['documents'].count_documents({"open_access_status":"bronze","year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})},
-                    {"type":"closed","value":self.colav_db['documents'].count_documents({"open_access_status":"closed","year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})},
-                    {"type":"hybrid","value":self.colav_db['documents'].count_documents({"open_access_status":"hybrid","year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})}
-                ])
+                val=self.colav_db['documents'].count_documents({"open_access_status":"green","year_published": {"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"green" ,"value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"gold","year_published":  {"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"gold"  ,"value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"bronze","year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"bronze","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"closed","year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"closed","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"hybrid","year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"hybrid","value":val})
+                
             else:
                 venn_query={"authors.affiliations.id":ObjectId(idx)}
-                open_access.extend([
-                    {"type":"green" ,"value":self.colav_db['documents'].count_documents({"open_access_status":"green" ,"authors.affiliations.id":ObjectId(idx)}) },
-                    {"type":"gold"  ,"value":self.colav_db['documents'].count_documents({"open_access_status":"gold"  ,"authors.affiliations.id":ObjectId(idx)})  },
-                    {"type":"bronze","value":self.colav_db['documents'].count_documents({"open_access_status":"bronze","authors.affiliations.id":ObjectId(idx)})},
-                    {"type":"closed","value":self.colav_db['documents'].count_documents({"open_access_status":"closed","authors.affiliations.id":ObjectId(idx)})},
-                    {"type":"hybrid","value":self.colav_db['documents'].count_documents({"open_access_status":"hybrid","authors.affiliations.id":ObjectId(idx)})}
-                ])
+                val=self.colav_db['documents'].count_documents({"open_access_status":"green" ,"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"green" ,"value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"gold"  ,"authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"gold","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"bronze","authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"bronze","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"closed","authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"closed","value":val})
+                val=self.colav_db['documents'].count_documents({"open_access_status":"hybrid","authors.affiliations.id":ObjectId(idx)})
+                if val!=0:
+                    open_access.append({"type":"hybrid","value":val})
+                
 
         tipos = self.colav_db['documents'].distinct("publication_type.type",{"authors.affiliations.id":ObjectId(idx)})
 
