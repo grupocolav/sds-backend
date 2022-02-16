@@ -188,21 +188,24 @@ class InstitutionsApp(sdsPluginBase):
             for reg in result:
                 group_name = ""
                 group_id = ""
-                if "branches" in reg["author"]["affiliations"][0]:
-                    for i in range(len(reg["author"]["affiliations"][0]["branches"])):    
-                        if reg["author"]["affiliations"][0]["branches"][i]["type"]=="group":
-                            group_name = reg["author"]["affiliations"][0]["branches"][i]["name"]
-                            group_id =   reg["author"]["affiliations"][0]["branches"][i]["id"]    
+                if "author" in reg.keys():
+                    if "affiliations" in reg["author"].keys():
+                        if len(reg["author"]["affiliations"])>0:
+                            if "branches" in reg["author"]["affiliations"][0]:
+                                for i in range(len(reg["author"]["affiliations"][0]["branches"])):    
+                                    if reg["author"]["affiliations"][0]["branches"][i]["type"]=="group":
+                                        group_name = reg["author"]["affiliations"][0]["branches"][i]["name"]
+                                        group_id =   reg["author"]["affiliations"][0]["branches"][i]["id"]    
 
-                entry.append({
-                    "id":reg["_id"],
-                    "name":reg["author"]["full_name"],
-                    "papers_count":reg["papers_count"],
-                    "citations_count":reg["citations_count"],
-                    "affiliation":{"institution":{"name":reg["author"]["affiliations"][0]["name"], 
-                                        "id":reg["author"]["affiliations"][0]["id"]},
-                                   "group":{"name":group_name, "id":group_id}}
-                })
+                            entry.append({
+                                "id":reg["_id"],
+                                "name":reg["author"]["full_name"],
+                                "papers_count":reg["papers_count"],
+                                "citations_count":reg["citations_count"],
+                                "affiliation":{"institution":{"name":reg["author"]["affiliations"][0]["name"], 
+                                                    "id":reg["author"]["affiliations"][0]["id"]},
+                                            "group":{"name":group_name, "id":group_id}}
+                            })
             
         return {"total":total_results,"page":page,"count":len(entry),"data":entry}
 
