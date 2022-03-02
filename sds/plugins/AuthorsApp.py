@@ -711,17 +711,6 @@ class AuthorsApp(sdsPluginBase):
 
             }
 
-        """
-        return {
-            "data":papers,
-            "count":len(papers),
-            "page":page,
-            "total":total,
-            "venn_source":self.get_venn(venn_query),
-            "open_access":open_access,
-
-        }
-        """
     def get_production_by_type(self,idx=None,max_results=100,page=1,start_year=None,end_year=None,sort=None,direction=None,tipo=None):
         total = 0
 
