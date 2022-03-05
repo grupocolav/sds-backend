@@ -2,49 +2,42 @@ from sds.sdsBase import sdsPluginBase, endpoint
 from bson import ObjectId
 from pymongo import ASCENDING,DESCENDING
 import os
+from flask import send_file
 
 
 
-class AuthorsApp(sdsPluginBase):
+class RegulationsApp(sdsPluginBase):
     def __init__(self, sds):
         super().__init__(sds)
 
     def get_info(self):
-        pass
+        files=[]
+        for filename in os.listdir('sds/etc/.'):
+            if "pdf" in filename:
+                files.append({"filename":filename,"size":os.stat('sds/etc/'+filename).st_size/1024})
+        return {"data":files}
 
-    def get_file(self,file_name):
-        pass
-
-    @endpoint('/app/authors', methods=['GET'])
-    def app_authors(self):
+    @endpoint('/app/regulations', methods=['GET'])
+    def app_regulations(self):
         data = self.request.args.get('data')
-        file = self.request.args.get('file')
+        filename = self.request.args.get('file')
         if data=="info":
             info=self.get_info()
-            if info:
+            if info:    
                 response = self.app.response_class(
-                response=info,
+                response=self.json.dumps(info),
                 status=200,
-                mimetype='text/plain',
-                headers={"Content-disposition":
-                 "attachment; filename=authors.json"}
+                mimetype='application/json'
                 )
             else:
                 response = self.app.response_class(
                 response=self.json.dumps({"status":"Request returned empty"}),
                 status=204,
-                mimetype='application/json'
-                )
-        elif file:
-            file=self.get_file()
-            if info:
-                response = self.app.response_class(
-                response=info,
-                status=200,
-                mimetype='text/plain',
-                headers={"Content-disposition":
-                 "attachment; filename=authors.json"}
-                )
+                mimetype='application/json' 
+            )
+        elif filename:
+            if os.path.isfile('sds/etc/'+filename):
+                response = send_file('sds/etc/'+filename,as_attachment=True)
             else:
                 response = self.app.response_class(
                 response=self.json.dumps({"status":"Request returned empty"}),
