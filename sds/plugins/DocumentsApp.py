@@ -42,10 +42,13 @@ class DocumentsApp(sdsPluginBase):
                 auth_reg=self.colav_db["authors"].find_one({"_id":author["id"]})
                 author_entry["name"]=auth_reg["full_name"]
                 author_entry["id"]=auth_reg["_id"]
-                author_entry["affiliations"]=[]
+                author_entry["affiliation"]=[]
                 for aff in author["affiliations"]:
                     aff_reg=self.colav_db["institutions"].find_one({"_id":aff["id"]})
-                    author_entry["affiliations"].append({"name":aff_reg["name"],"id":aff_reg["_id"]})
+                    author_entry["affiliation"].append(
+                        {"institution":
+                            {"name":aff_reg["name"],"id":aff_reg["_id"]}
+                        })
 
                 entry["authors"].append(author_entry)
             
