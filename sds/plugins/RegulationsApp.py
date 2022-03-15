@@ -2,6 +2,8 @@ from sds.sdsBase import sdsPluginBase, endpoint
 from bson import ObjectId
 from pymongo import ASCENDING,DESCENDING
 import os
+import datetime as dt
+import re
 from flask import send_file
 
 
@@ -12,10 +14,15 @@ class RegulationsApp(sdsPluginBase):
 
     def get_info(self):
         files=[]
+        dates={}
         for filename in os.listdir('sds/etc/.'):
             if "pdf" in filename:
-                files.append({"filename":filename,"size":os.stat('sds/etc/'+filename).st_size/1024})
-        return {"data":files}
+                date_str=re.findall("^[0-9]*-[0-9]*-[0-9]*",filename)[0]
+                date=dt.datetime.strptime(date_str,"%Y-%m-%d")
+                dates[date_str]=date.timestamp()
+                files.append({"filename":filename,"date":date_str,"size":os.stat('sds/etc/'+filename).st_size/1024})
+        files_sorted=sorted(files,key=lambda x:dates[x["date"]],reverse=True)
+        return {"data":files_sorted}
 
     @endpoint('/app/regulations', methods=['GET'])
     def app_regulations(self):
