@@ -41,6 +41,7 @@ class AuthorsApp(sdsPluginBase):
                 "name":author["full_name"],
                 "affiliation":{"institution":{"name":"","id":""},"group":{"name":"","id":""}},
                 "external_urls":[],
+                "policies":author["policies"] if "policies" in author.keys() else [],
                 "logo":""
             }
             if "affiliations" in author.keys():

@@ -1,7 +1,6 @@
 from sds.sdsBase import sdsPluginBase, endpoint
 from bson import ObjectId
 from pymongo import ASCENDING,DESCENDING
-from pickle import load
 from datetime import date
 from math import log
 from flask import redirect

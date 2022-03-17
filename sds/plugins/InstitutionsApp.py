@@ -19,7 +19,8 @@ class InstitutionsApp(sdsPluginBase):
             entry={"id":institution["_id"],
                 "name":institution["name"],
                 "external_urls":institution["external_urls"],
-                "logo":institution["logo_url"]
+                "logo":institution["logo_url"],
+                "policies":institution["policies"] if "policies" in institution.keys() else []
             }
 
         if(idx):

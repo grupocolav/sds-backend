@@ -19,6 +19,7 @@ class DocumentsApp(sdsPluginBase):
                 "volume":document["volume"],
                 "issue":document["issue"],
                 "authors":[],
+                "policies":document["policies"] if "policies" in document.keys() else [],
                 "open_access_status":document["open_access_status"],
                 "citations_count":document["citations_count"],
                 "external_ids":[],

@@ -38,7 +38,8 @@ class GroupsApp(sdsPluginBase):
                 "type":group["type"],
                 "abbreviations":"",
                 "external_urls":group["external_urls"],
-                "affiliation":{}
+                "affiliation":{},
+                "policies":group["policies"] if "policies" in agroup.keys() else []
             }
             if len(group["abbreviations"])>0:
                 entry["abbreviations"]=group["abbreviations"][0]
