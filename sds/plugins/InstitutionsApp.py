@@ -20,8 +20,20 @@ class InstitutionsApp(sdsPluginBase):
                 "name":institution["name"],
                 "external_urls":institution["external_urls"],
                 "logo":institution["logo_url"],
-                "policies":institution["policies"] if "policies" in institution.keys() else []
+                "policies":{}
             }
+            if "policies" in institution.keys():
+                for policy in institution["policies"]:
+                    policy_reg=self.colav_db["policies"].find_one({"_id":policy["id"]})
+                    policy_entry={
+                        "id":policy["id"],
+                        "index":policy_reg["ids"]["ODS"] if "ODS" in policy_reg["ids"].keys() else "",
+                        "name":policy["name"]
+                    }
+                    if policy_reg["abbreviations"][0] in entry["policies"].keys():
+                        entry["policies"][policy_reg["abbreviations"][0]].append(policy_entry)
+                    else:
+                        entry["policies"][policy_reg["abbreviations"][0]]=[policy_entry]
 
         if(idx):
             result=self.colav_db['documents'].find({"authors.affiliations.id":ObjectId(idx)},{"year_published":1}).sort([("year_published",ASCENDING)]).limit(1)
@@ -96,11 +108,7 @@ class InstitutionsApp(sdsPluginBase):
         elif start_year and end_year:
             pipeline.extend([{"$match":{"citers.year_published":{"$gte":start_year,"$lte":end_year}}}])
 
-            
-
-
         geo_pipeline = pipeline[:] # a clone
-
 
         pipeline.extend([
             {"$group":{
@@ -110,7 +118,6 @@ class InstitutionsApp(sdsPluginBase):
                 "_id":1
             }}
         ])
-
 
         geo_pipeline.extend([
             {"$unwind":"$citers.authors"},
@@ -123,13 +130,9 @@ class InstitutionsApp(sdsPluginBase):
             {"$unwind": "$_id"}, {"$unwind": "$country"}
         ])
 
-
         for idx,reg in enumerate(self.colav_db["documents"].aggregate(pipeline)):
             entry["citations"]+=reg["count"]
             entry["yearly_citations"].append({"year":reg["_id"],"value":reg["count"]})
-
-
-
 
         for i, reg in enumerate(self.colav_db["documents"].aggregate(geo_pipeline)):
             entry["geo"].append({"country": reg["country"],
@@ -211,7 +214,6 @@ class InstitutionsApp(sdsPluginBase):
         return {"total":total_results,"page":page,"count":len(entry),"data":entry}
 
 
-
     def get_coauthors(self,idx=None,start_year=None,end_year=None,page=1,max_results=100):
         
         if start_year:
@@ -245,8 +247,6 @@ class InstitutionsApp(sdsPluginBase):
                     {"$match":{"year_published":{"$gte":start_year,"$lte":end_year},"authors.affiliations.id":ObjectId(idx)}}
                 ]
                 
-
-
         pipeline.extend([
             {"$unwind":"$authors"},
             {"$unwind":"$authors.affiliations"},
@@ -258,7 +258,6 @@ class InstitutionsApp(sdsPluginBase):
             {"$project":{"count":1,"affiliation.name":1}},
             {"$unwind":"$affiliation"}
         ])
-
 
         total_results = len(set([reg["authors"]["affiliations"]["id"] for reg in self.colav_db["documents"].aggregate(pipeline[:4])]))
 
@@ -279,11 +278,9 @@ class InstitutionsApp(sdsPluginBase):
                 print("Could not convert end max to int")
                 return None
 
-        
         skip = (max_results*(page-1))
 
         pipeline.extend([{"$skip":skip},{"$limit":max_results}])
-
 
         entry={
             "institutions":[],
@@ -330,7 +327,6 @@ class InstitutionsApp(sdsPluginBase):
         for item in countries:
             item["log_count"]=log(item["count"])
         entry["geo"]=countries
-
 
         '''nodes=[]
         edges=[]

@@ -19,12 +19,25 @@ class DocumentsApp(sdsPluginBase):
                 "volume":document["volume"],
                 "issue":document["issue"],
                 "authors":[],
-                "policies":document["policies"] if "policies" in document.keys() else [],
+                "policies":{},
                 "open_access_status":document["open_access_status"],
                 "citations_count":document["citations_count"],
                 "external_ids":[],
                 "external_urls":document["urls"]
             }
+
+            if "policies" in document.keys():
+                for policy in document["policies"]:
+                    policy_reg=self.colav_db["policies"].find_one({"_id":policy["id"]})
+                    policy_entry={
+                        "id":policy["id"],
+                        "index":policy_reg["ids"]["ODS"] if "ODS" in policy_reg["ids"].keys() else "",
+                        "name":policy["name"]
+                    }
+                    if policy_reg["abbreviations"][0] in entry["policies"].keys():
+                        entry["policies"][policy_reg["abbreviations"][0]].append(policy_entry)
+                    else:
+                        entry["policies"][policy_reg["abbreviations"][0]]=[policy_entry]
 
             source=self.colav_db["sources"].find_one({"_id":document["source"]["id"]})
             entry_source={

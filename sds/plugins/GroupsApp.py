@@ -39,8 +39,20 @@ class GroupsApp(sdsPluginBase):
                 "abbreviations":"",
                 "external_urls":group["external_urls"],
                 "affiliation":{},
-                "policies":group["policies"] if "policies" in agroup.keys() else []
+                "policies":{}
             }
+            if "policies" in group.keys():
+                for policy in group["policies"]:
+                    policy_reg=self.colav_db["policies"].find_one({"_id":policy["id"]})
+                    policy_entry={
+                        "id":policy["id"],
+                        "index":policy_reg["ids"]["ODS"] if "ODS" in policy_reg["ids"].keys() else "",
+                        "name":policy["name"]
+                    }
+                    if policy_reg["abbreviations"][0] in entry["policies"].keys():
+                        entry["policies"][policy_reg["abbreviations"][0]].append(policy_entry)
+                    else:
+                        entry["policies"][policy_reg["abbreviations"][0]]=[policy_entry]
             if len(group["abbreviations"])>0:
                 entry["abbreviations"]=group["abbreviations"][0]
             inst_id=""

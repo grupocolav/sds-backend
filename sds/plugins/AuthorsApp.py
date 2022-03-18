@@ -41,9 +41,22 @@ class AuthorsApp(sdsPluginBase):
                 "name":author["full_name"],
                 "affiliation":{"institution":{"name":"","id":""},"group":{"name":"","id":""}},
                 "external_urls":[],
-                "policies":author["policies"] if "policies" in author.keys() else [],
+                "policies":{},
                 "logo":""
             }
+            if "policies" in author.keys():
+                for policy in author["policies"]:
+                    policy_reg=self.colav_db["policies"].find_one({"_id":policy["id"]})
+                    policy_entry={
+                        "id":policy["id"],
+                        "index":policy_reg["ids"]["ODS"] if "ODS" in policy_reg["ids"].keys() else "",
+                        "name":policy["name"]
+                    }
+                    if policy_reg["abbreviations"][0] in entry["policies"].keys():
+                        entry["policies"][policy_reg["abbreviations"][0]].append(policy_entry)
+                    else:
+                        entry["policies"][policy_reg["abbreviations"][0]]=[policy_entry]
+
             if "affiliations" in author.keys():
                 if len(author["affiliations"]):
                     entry["affiliation"]["institution"]["id"]=author["affiliations"][-1]["id"]
