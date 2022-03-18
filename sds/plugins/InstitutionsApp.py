@@ -332,7 +332,7 @@ class InstitutionsApp(sdsPluginBase):
         entry["geo"]=countries
 
 
-        nodes=[]
+        '''nodes=[]
         edges=[]
 
         nodes_idlist=[]
@@ -425,7 +425,7 @@ class InstitutionsApp(sdsPluginBase):
                 "degree":0,
                 "size":10,
                 "label":aff["full_name"] if aff else "",
-            }],"edges":[]}
+            }],"edges":[]}'''
 
 
         return {"total":total_results,"page":page,"count":len(entry["institutions"]),"data":entry}

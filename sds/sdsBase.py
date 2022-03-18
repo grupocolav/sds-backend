@@ -79,7 +79,6 @@ class sdsPluginBase:
         self.dburi = sds.dburi
         self.dbclient = sds.dbclient
         self.colav_db = sds.colav_db
-        self.arangodb = sds.arangodb
         self.ip = sds.ip
         self.port = sds.port
         self.info_level = sds.info_level

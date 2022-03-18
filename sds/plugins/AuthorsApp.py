@@ -346,7 +346,7 @@ class AuthorsApp(sdsPluginBase):
             item["log_count"]=log(item["count"])
         entry["geo"]=countries
 
-        nodes=[]
+        '''nodes=[]
         edges=[]
 
         nodes_idlist=[]
@@ -450,7 +450,7 @@ class AuthorsApp(sdsPluginBase):
                 "size":10,
                 "label":au["full_name"] if  au  else "",
                 "affiliation":aff["name"] if aff!="" else "",
-            }],"edges":[]}
+            }],"edges":[]}'''
 
         return {"data":entry}
 
