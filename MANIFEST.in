@@ -1,2 +1,3 @@
 recursive-include sds/ *.py
+recursive-include sds/etc *.json
 recursive-include sds/ *.*
