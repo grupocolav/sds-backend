@@ -1,2 +1,2 @@
-recursive-include hunabku/ *.py
-recursive-include hunabku/ *.*
+recursive-include sds/ *.py
+recursive-include sds/ *.*
