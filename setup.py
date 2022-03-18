@@ -85,7 +85,8 @@ def main():
             'pandas',
             'numpy',
             'requests>=2.22.0',
-            'joblib>=0.14.1'
+            'joblib>=0.14.1',
+            'bs4'
         ],
     )
 
