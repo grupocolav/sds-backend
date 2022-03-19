@@ -87,7 +87,8 @@ def main():
             'requests>=2.22.0',
             'joblib>=0.14.1',
             'bs4',
-            'html_to_json'
+            'html_to_json',
+            'flask-cors'
         ],
     )
 
